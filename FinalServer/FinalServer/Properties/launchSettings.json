@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "FinalServer": {
+      "commandName": "Executable",
+      "executablePath": "./DarkRift.Server.Console.exe",
+      "workingDirectory": "..\\Darkrift"
+    }
+  }
+}

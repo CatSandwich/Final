@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.7.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="DarkRift">
+      <HintPath>..\Darkrift\Lib\DarkRift.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(Targetpath) $(SolutionDir)Darkrift\$(TargetName).dll&#xD;&#xA;copy $(Targetpath) $(SolutionDir)..\FinalClient\Assets\$(TargetName).dll" />
+  </Target>
+
+</Project>
