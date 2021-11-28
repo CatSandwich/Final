@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(Targetpath) $(SolutionDir)Darkrift\$(TargetName).dll&#xD;&#xA;copy $(Targetpath) $(SolutionDir)..\FinalClient\Assets\$(TargetName).dll" />
+    <Exec Command="copy &quot;$(Targetpath)&quot; &quot;$(SolutionDir)Darkrift\$(TargetName).dll&quot;&#xD;&#xA;copy &quot;$(Targetpath)&quot; &quot;$(SolutionDir)..\FinalClient\Assets\$(TargetName).dll&quot;" />
   </Target>
 
 </Project>
