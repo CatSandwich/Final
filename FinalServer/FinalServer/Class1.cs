@@ -27,9 +27,6 @@ namespace FinalServer
 
         private void _messageReceivedHandler(object sender, MessageReceivedEventArgs args)
         {
-            Console.WriteLine("Message received - yay!!!");
-            args.Client.SendMessage(0, new TestData() { FirstName = "Ree", LastName = "TS", Age = 42 });
-
             switch ((ClientToServer)args.Tag)
             {
                 case ClientToServer.PaddlePosition:
