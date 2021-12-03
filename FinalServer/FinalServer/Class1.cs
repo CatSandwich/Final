@@ -5,7 +5,6 @@ using DarkRift.Server;
 
 using FinalCommon;
 using FinalCommon.Data;
-using FinalServer.Data;
 
 namespace FinalServer
 {
