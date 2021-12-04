@@ -4,9 +4,9 @@ namespace FinalCommon.Data
 {
     public class Vector3 : IDarkRiftSerializable
     {
-        float X;
-        float Y;
-        float Z;
+        public float X;
+        public float Y;
+        public float Z;
 
         public void Deserialize(DeserializeEvent e)
         {
