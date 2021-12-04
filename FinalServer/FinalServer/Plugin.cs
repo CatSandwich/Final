@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using DarkRift;
 using DarkRift.Server;
@@ -10,18 +11,32 @@ namespace FinalServer
 {
     public class FinalServerPlugin : Plugin
     {
-        public override bool ThreadSafe => false;
+        public override bool ThreadSafe => true;
         public override Version Version => new Version(1, 0, 0);
+
+        public GameController Game;
+
 
         public FinalServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
         {
+            Game = new GameController();
             pluginLoadData.ClientManager.ClientConnected += _clientConnectedHandler;
         }
 
         private void _clientConnectedHandler(object sender, ClientConnectedEventArgs args)
         {
-            args.Client.MessageReceived += _messageReceivedHandler;
-            Console.WriteLine("Client connected - yay!!!");
+            if (Game.LeftClient == null)
+            {
+                args.Client.MessageReceived += _messageReceivedHandler;
+                Game.LeftClient = args.Client;
+            }
+            else if (Game.RightClient == null)
+            {
+                args.Client.MessageReceived += _messageReceivedHandler;
+                Game.RightClient = args.Client;
+                Game.GameTask = Task.Run(Game.Run);
+            }
+            else Console.WriteLine("Client overflow - ignoring new client.");
         }
 
         private void _messageReceivedHandler(object sender, MessageReceivedEventArgs args)
@@ -30,15 +45,10 @@ namespace FinalServer
             {
                 case ClientToServer.PaddlePosition:
                     {
-                        _handlePaddlePosition(args.GetMessage().Deserialize<PaddlePositionData>());
+                        Game.PaddlePositionHandler(args.Client, args.GetMessage().Deserialize<PaddlePositionData>().Position);
                         break;
                     }
             }
-        }
-
-        private void _handlePaddlePosition(PaddlePositionData data)
-        {
-            
         }
     }
 
