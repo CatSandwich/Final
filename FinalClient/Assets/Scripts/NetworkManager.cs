@@ -62,8 +62,11 @@ public class NetworkManager : MonoBehaviour
     public void sendPosition(int id, UnityEngine.Vector3 position)
     {
 
+        Debug.Log("Trying to send");
         using (var writer = DarkRiftWriter.Create())
         {
+
+            Debug.Log("Sending");
             PaddlePositionData data = new PaddlePositionData();
             data.Position = new FinalCommon.Data.Vector3 { X = position.x, Y = position.y, Z = position.z };
                 

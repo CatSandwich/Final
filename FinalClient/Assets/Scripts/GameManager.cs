@@ -24,15 +24,18 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         //_paddle1.set
-        if (Input.GetKey(KeyCode.W))
+        if (myId != 0)
         {
-            objects[myId].transform.position += UnityEngine.Vector3.up * Time.deltaTime * speed;
+            if (Input.GetKey(KeyCode.W))
+            {
+                objects[myId].transform.position += UnityEngine.Vector3.up * Time.deltaTime * speed;
+            }
+            if (Input.GetKey(KeyCode.S))
+            {
+                objects[myId].transform.position += UnityEngine.Vector3.down * Time.deltaTime * speed;
+            }
+            NetworkManager.Instance.sendPosition(myId, objects[myId].transform.position);
         }
-        if (Input.GetKey(KeyCode.S))
-        {
-            objects[myId].transform.position += UnityEngine.Vector3.down * Time.deltaTime * speed;
-        }
-        NetworkManager.Instance.sendPosition(myId, objects[myId].transform.position);
 
     }
 
