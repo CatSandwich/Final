@@ -16,7 +16,7 @@ namespace FinalServer
         public const float PaddleOffset = 1f;
 
         public const float Speed = 3f;
-        public const int TickSpeed = 50;
+        public const int TickSpeed = 20;
 
         public int BallDirection = 1;
 
@@ -46,7 +46,7 @@ namespace FinalServer
         {
             if(client.ID == LeftClient.ID)
             {
-                lock (LeftPaddle)
+                lock (this)
                 {
                     LeftPaddle.Position = newPos;
                     return;
@@ -55,35 +55,25 @@ namespace FinalServer
 
             if(client.ID == RightClient.ID)
             {
-                lock (RightPaddle)
+                lock (this)
                 {
                     RightPaddle.Position = newPos;
                     return;
                 }
             }
 
-            Console.WriteLine("Trying to accept input from client not in game.");
+            Console.WriteLine("[ERROR] Trying to accept input from client not in game.");
         }
 
         public async void Run()
         {
-            lock (this)
-            {
-                // Initialize game world
-                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Ball, Ball.Size));
-                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.LeftPaddle, LeftPaddle.Size));
-                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.RightPaddle, RightPaddle.Size));
-                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Camera, GameWorldSize));
-                LeftClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Camera, GameWorldSize / 2));
-                LeftClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Ball, GameWorldSize / 2));
-
-                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Ball, Ball.Size));
-                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.LeftPaddle, LeftPaddle.Size));
-                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.RightPaddle, RightPaddle.Size));
-                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Camera, GameWorldSize));
-                RightClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Camera, GameWorldSize / 2));
-                RightClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Ball, GameWorldSize / 2));
-            }
+            // Initialize game world
+            _resize(ObjectIds.Ball       , Ball.Size              );
+            _resize(ObjectIds.LeftPaddle , LeftPaddle.Size        );
+            _resize(ObjectIds.RightPaddle, RightPaddle.Size       );
+            _resize(ObjectIds.Camera     , GameWorldSize          );
+            _move  (ObjectIds.Camera     , GameWorldSize / 2);
+            _move  (ObjectIds.Ball       , GameWorldSize / 2);
 
             await Task.Delay(3000);
 
@@ -104,28 +94,25 @@ namespace FinalServer
                 if(Ball.Position.X <= 0)
                 {
                     Console.WriteLine("Left paddle lost");
-                    Ball.Position.X = GameWorldSize.X / 2;
-                    Ball.Position.Y = GameWorldSize.Y / 2;
+                    Ball.Position = GameWorldSize / 2;
                 }
 
                 if(Ball.Position.X >= GameWorldSize.X)
                 {
                     Console.WriteLine("Right paddle lost");
-                    Ball.Position.X = GameWorldSize.X / 2;
-                    Ball.Position.Y = GameWorldSize.Y / 2;
+                    Ball.Position = GameWorldSize / 2;
                 }
-
+                
+                _move(ObjectIds.Ball, Ball.Position);
                 LeftClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.RightPaddle, Position = RightPaddle.Position });
-                LeftClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.Ball, Position = Ball.Position });
-
                 RightClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.LeftPaddle, Position = LeftPaddle.Position });
-                RightClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.Ball, Position = Ball.Position });
+
                 await Task.Delay(TickSpeed);
             }
         }
 
         private void _move(ObjectIds obj, Vector3 pos) => _send(ServerToClient.MoveObject, new MoveObjectData(obj, pos));
-        private void _resize(ObjectIds obj, Vector2 size) => _send(ServerToClient.ResizeObject, new MoveObjectData(obj, size));
+        private void _resize(ObjectIds obj, Vector2 size) => _send(ServerToClient.ResizeObject, new ResizeObjectData(obj, size));
 
         private void _send<T>(ServerToClient tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable
         {
