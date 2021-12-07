@@ -54,6 +54,7 @@ namespace FinalServer
 
     static class ClientExtensions
     {
+        public static void SendMessage<T>(this IClient client, ServerToClient tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable => client.SendMessage((ushort)tag, data, mode);
         public static void SendMessage<T>(this IClient client, ushort tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable
         {
             using (var writer = DarkRiftWriter.Create())

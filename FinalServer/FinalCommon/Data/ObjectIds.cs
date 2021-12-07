@@ -10,6 +10,7 @@ namespace FinalCommon.Data
     {
         Ball,
         LeftPaddle,
-        RightPaddle
+        RightPaddle,
+        Camera
     }
 }

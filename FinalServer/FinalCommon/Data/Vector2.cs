@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,5 +25,7 @@ namespace FinalCommon.Data
             e.Writer.Write(X);
             e.Writer.Write(Y);
         }
+
+        public static Vector2 operator /(Vector2 lhs, int rhs) => new Vector2 { X = lhs.X / rhs, Y = lhs.Y / rhs };
     }
 }

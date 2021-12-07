@@ -21,5 +21,7 @@ namespace FinalCommon.Data
             e.Writer.Write(Y); 
             e.Writer.Write(Z);
         }
+
+        public static implicit operator Vector3(Vector2 v2) => new Vector3 { X = v2.X, Y = v2.Y, Z = 0 };
     }
 }

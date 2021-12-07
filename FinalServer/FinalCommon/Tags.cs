@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FinalCommon
+﻿namespace FinalCommon
 {
     public enum ServerToClient : ushort
     {
-        MoveObject
+        MoveObject,
+        ResizeObject
     }
 
     public enum ClientToServer : ushort

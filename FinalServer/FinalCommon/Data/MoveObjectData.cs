@@ -13,6 +13,17 @@ namespace FinalCommon.Data
         public ObjectIds Id;
         public Vector3 Position;
 
+        public MoveObjectData()
+        {
+
+        }
+
+        public MoveObjectData(ObjectIds id, Vector3 position)
+        {
+            Id = id;
+            Position = position;
+        }
+
         public void Deserialize(DeserializeEvent e)
         {
             Id = (ObjectIds)e.Reader.ReadUInt16();

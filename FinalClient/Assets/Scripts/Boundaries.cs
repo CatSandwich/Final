@@ -18,9 +18,9 @@ public class Boundaries : MonoBehaviour
         objectHeight = transform.GetComponent<SpriteRenderer>().bounds.extents.y;
     }
 
-    void LateUpdate()
+    void Update()
     {
-        Vector3 viewPos = transform.position;
+        var viewPos = transform.position;
         viewPos.x = Mathf.Clamp(viewPos.x, screenLimits.x * -1 + objectWidth, screenLimits.x - objectWidth);
         viewPos.y = Mathf.Clamp(viewPos.y, screenLimits.y * -1 + objectHeight, screenLimits.y - objectHeight);
         transform.position = viewPos;

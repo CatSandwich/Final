@@ -6,6 +6,7 @@ using FinalCommon.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DarkRift;
 
 namespace FinalServer
 {
@@ -23,7 +24,7 @@ namespace FinalServer
 
         public Task GameTask;
 
-        public Box Ball = new Box { Position = new Vector3 { X = GameWorldSize.X / 2, Y = GameWorldSize.Y / 2 } };
+        public Box Ball = new Box { Position = new Vector3 { X = GameWorldSize.X / 2, Y = GameWorldSize.Y / 2 }, Size = new Vector2{X = 0.25f, Y = 0.25f} };
 
         public IClient LeftClient;
         public IClient RightClient;
@@ -66,6 +67,26 @@ namespace FinalServer
 
         public async void Run()
         {
+            lock (this)
+            {
+                // Initialize game world
+                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Ball, Ball.Size));
+                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.LeftPaddle, LeftPaddle.Size));
+                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.RightPaddle, RightPaddle.Size));
+                LeftClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Camera, GameWorldSize));
+                LeftClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Camera, GameWorldSize / 2));
+                LeftClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Ball, GameWorldSize / 2));
+
+                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Ball, Ball.Size));
+                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.LeftPaddle, LeftPaddle.Size));
+                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.RightPaddle, RightPaddle.Size));
+                RightClient.SendMessage(ServerToClient.ResizeObject, new ResizeObjectData(ObjectIds.Camera, GameWorldSize));
+                RightClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Camera, GameWorldSize / 2));
+                RightClient.SendMessage(ServerToClient.MoveObject, new MoveObjectData(ObjectIds.Ball, GameWorldSize / 2));
+            }
+
+            await Task.Delay(3000);
+
             while (true)
             {
                 Ball.Position.X += CalculatedSpeed;
@@ -83,11 +104,15 @@ namespace FinalServer
                 if(Ball.Position.X <= 0)
                 {
                     Console.WriteLine("Left paddle lost");
+                    Ball.Position.X = GameWorldSize.X / 2;
+                    Ball.Position.Y = GameWorldSize.Y / 2;
                 }
 
                 if(Ball.Position.X >= GameWorldSize.X)
                 {
                     Console.WriteLine("Right paddle lost");
+                    Ball.Position.X = GameWorldSize.X / 2;
+                    Ball.Position.Y = GameWorldSize.Y / 2;
                 }
 
                 LeftClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.RightPaddle, Position = RightPaddle.Position });
@@ -97,6 +122,15 @@ namespace FinalServer
                 RightClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.Ball, Position = Ball.Position });
                 await Task.Delay(TickSpeed);
             }
+        }
+
+        private void _move(ObjectIds obj, Vector3 pos) => _send(ServerToClient.MoveObject, new MoveObjectData(obj, pos));
+        private void _resize(ObjectIds obj, Vector2 size) => _send(ServerToClient.ResizeObject, new MoveObjectData(obj, size));
+
+        private void _send<T>(ServerToClient tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable
+        {
+            LeftClient.SendMessage(tag, data, mode);
+            RightClient.SendMessage(tag, data, mode);
         }
     }
 }
