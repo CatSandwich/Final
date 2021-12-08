@@ -1,73 +1,68 @@
-﻿using DarkRift.Server;
-
+﻿using DarkRift;
+using DarkRift.Server;
 using FinalCommon;
 using FinalCommon.Data;
-
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using DarkRift;
 
 namespace FinalServer
 {
+    // Controls a game of pong between two external clients
     public class GameController
     {
-        public static readonly Vector2 GameWorldSize = new Vector2 { X = 10, Y = 5 };
+        // The distance from outer horizontal bounds to the paddle
         public const float PaddleOffset = 1f;
-
+        // The speed in units per second that the ball moves
         public const float Speed = 3f;
+        // The delay in milliseconds between each game tick
         public const int TickSpeed = 20;
+        // The bounds of the game
+        public static readonly Vector2 GameWorldSize = new Vector2(10, 5);
 
-        public Vector2 BallDirection = new Vector2{X = 1, Y = 1};
+        // Stores the sign of the ball's velocity
+        public Vector2 BallDirection = new Vector2(1, 1);
+        // Calculates the ball's velocity
         public Vector2 CalculatedSpeed => BallDirection * Speed * TickSpeed / 1000f;
 
+        // Stores the task object encapsulating the game
         public Task GameTask;
 
-        public Box Ball = new Box { Position = new Vector3 { X = GameWorldSize.X / 2, Y = GameWorldSize.Y / 2 }, Size = new Vector2{X = 0.25f, Y = 0.25f} };
+        // Game objects
+        public Box Ball = new Box 
+        { 
+            Position = new Vector3(GameWorldSize.X / 2, GameWorldSize.Y / 2), 
+            Size = new Vector2(0.25f, 0.25f)
+        };
+        public Box LeftPaddle = new Box
+        {
+            Position = new Vector3(PaddleOffset, GameWorldSize.Y / 2),
+            Size = new Vector2(0.5f, 1f)
+        };
+        public Box RightPaddle = new Box
+        {
+            Position = new Vector3(GameWorldSize.X - PaddleOffset, GameWorldSize.Y / 2),
+            Size = new Vector2(0.5f, 1f)
+        };
 
+        // Clients
         public IClient LeftClient;
         public IClient RightClient;
 
+        // Prevents input until the game world is initialized
         private bool _init = false;
 
-        public Paddle LeftPaddle = new Paddle 
-        { 
-            Position = new Vector3 { X = PaddleOffset, Y = GameWorldSize.Y / 2, Z = 0 }, 
-            Size = new Vector2 { X = 0.5f, Y = 1f }, 
-            Side = PaddleSide.Left 
-        };
-        public Paddle RightPaddle = new Paddle 
-        { 
-            Position = new Vector3 { X = GameWorldSize.X - PaddleOffset, Y = GameWorldSize.Y / 2, Z = 0 }, 
-            Size = new Vector2 { X = 0.5f, Y = 1f }, 
-            Side = PaddleSide.Right 
-        };
-
-        public void PaddlePositionHandler(IClient client, Vector3 newPos)
+        // Updates player's paddle's position
+        public void PaddlePositionHandler(IClient client, PaddlePositionData pos)
         {
             if (!_init) return;
 
-            if(client.ID == LeftClient.ID)
+            lock (this)
             {
-                lock (this)
-                {
-                    LeftPaddle.Position.Y = newPos.Y;
-                    return;
-                }
+                (client.ID == LeftClient.ID ? LeftPaddle : RightPaddle).Position.Y = pos.Position.Y;
             }
-
-            if(client.ID == RightClient.ID)
-            {
-                lock (this)
-                {
-                    RightPaddle.Position.Y = newPos.Y;
-                    return;
-                }
-            }
-
-            Console.WriteLine("[ERROR] Trying to accept input from client not in game.");
         }
 
+        // Core game logic
         public async void Run()
         {
             // Initialize game world
@@ -75,7 +70,7 @@ namespace FinalServer
             _resize(ObjectIds.LeftPaddle, LeftPaddle.Size);
             _resize(ObjectIds.RightPaddle, RightPaddle.Size);
             _resize(ObjectIds.Camera, GameWorldSize);
-            _move(ObjectIds.Camera, new Vector3{X = GameWorldSize.X / 2, Y = GameWorldSize.Y / 2, Z = -10});
+            _move(ObjectIds.Camera, new Vector3(GameWorldSize.X / 2, GameWorldSize.Y / 2, -10));
             _move(ObjectIds.Ball, GameWorldSize / 2);
             _move(ObjectIds.LeftPaddle, LeftPaddle.Position);
             _move(ObjectIds.RightPaddle, RightPaddle.Position);
@@ -83,50 +78,55 @@ namespace FinalServer
             LeftClient.SendMessage(ServerToClient.SetOwnership, new SetOwnershipData { Id = ObjectIds.LeftPaddle });
             RightClient.SendMessage(ServerToClient.SetOwnership, new SetOwnershipData { Id = ObjectIds.RightPaddle });
 
+            // Wait 3 seconds for players to get ready
             await Task.Delay(3000);
-
             _init = true;
 
+            // Core game loop
             while (true)
             {
                 Ball.Position += CalculatedSpeed;
 
-                if(Ball.Position.X - Ball.Size.X / 2 <= LeftPaddle.Position.X + LeftPaddle.Size.X / 2 && Ball.CheckYAxisCollision(LeftPaddle))
-                {
-                    BallDirection.X = 1;
-                }
+                // Paddle collision
+                if (Ball.CheckCollision(LeftPaddle)) BallDirection.X = 1;
+                if (Ball.CheckCollision(RightPaddle)) BallDirection.X = -1;
 
-                if(Ball.Position.X + Ball.Size.X / 2 >= RightPaddle.Position.X - RightPaddle.Size.X / 2 && Ball.CheckYAxisCollision(RightPaddle))
-                {
-                    BallDirection.X = -1;
-                }
-
+                // Outer horizontal bounds
                 if(Ball.Position.X <= 0)
                 {
                     Console.WriteLine("Left paddle lost");
                     Ball.Position = GameWorldSize / 2;
+                    _move(ObjectIds.Ball, Ball.Position);
+                    await Task.Delay(1000);
                 }
-
                 if (Ball.Position.X >= GameWorldSize.X)
                 {
                     Console.WriteLine("Right paddle lost");
                     Ball.Position = GameWorldSize / 2;
+                    _move(ObjectIds.Ball, Ball.Position);
+                    await Task.Delay(1000);
                 }
 
+                // Outer vertical bounds
                 if (Ball.Position.Y + Ball.Size.Y / 2 >= GameWorldSize.Y) BallDirection.Y = -1;
                 if (Ball.Position.Y - Ball.Size.Y / 2 <= 0) BallDirection.Y = 1;
 
+                // Broadcast new information
                 _move(ObjectIds.Ball, Ball.Position);
                 LeftClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.RightPaddle, Position = RightPaddle.Position });
                 RightClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.LeftPaddle, Position = LeftPaddle.Position });
 
+                // Sleep to enforce tick rate
                 await Task.Delay(TickSpeed);
             }
         }
 
+        // Broadcasts the new position, pos, of an object, obj
         private void _move(ObjectIds obj, Vector3 pos) => _send(ServerToClient.MoveObject, new MoveObjectData(obj, pos));
+        // Broadcasts the new size, size, of an object, obj
         private void _resize(ObjectIds obj, Vector2 size) => _send(ServerToClient.ResizeObject, new ResizeObjectData(obj, size));
 
+        // Broadcasts a generic message
         private void _send<T>(ServerToClient tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable
         {
             LeftClient.SendMessage(tag, data, mode);

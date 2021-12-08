@@ -2,15 +2,13 @@
 
 namespace FinalCommon.Data
 {
+    // Stores an object, Id, and a size, Size, to resize it to
     public class ResizeObjectData : IDarkRiftSerializable
     {
         public ObjectIds Id;
         public Vector2 Size;
 
-        public ResizeObjectData()
-        {
-
-        }
+        public ResizeObjectData() { }
 
         public ResizeObjectData(ObjectIds id, Vector2 size)
         {

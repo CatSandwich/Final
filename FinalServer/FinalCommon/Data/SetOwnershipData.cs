@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DarkRift;
+﻿using DarkRift;
 
 namespace FinalCommon.Data
 {
+    // Stores an object, Id, for the client to assume ownership of
     public class SetOwnershipData : IDarkRiftSerializable
     {
         public ObjectIds Id;

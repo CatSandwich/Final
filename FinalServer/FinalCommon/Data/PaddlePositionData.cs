@@ -2,6 +2,7 @@
 
 namespace FinalCommon.Data
 {
+    // Stores a position, Position, for the server to move the paddle to
     public class PaddlePositionData : IDarkRiftSerializable
     {
         public Vector3 Position;

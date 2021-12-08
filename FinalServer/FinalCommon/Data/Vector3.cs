@@ -2,23 +2,33 @@
 
 namespace FinalCommon.Data
 {
+    // Stores 3 dimensions of floating point values
     public class Vector3 : IDarkRiftSerializable
     {
         public float X;
         public float Y;
         public float Z;
 
+        public Vector3() { }
+
+        public Vector3(float x = 0, float y = 0, float z = 0)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
         public void Deserialize(DeserializeEvent e)
         {
             X = e.Reader.ReadSingle();
-            Y = e.Reader.ReadSingle();  
+            Y = e.Reader.ReadSingle();
             Z = e.Reader.ReadSingle();
         }
 
         public void Serialize(SerializeEvent e)
         {
             e.Writer.Write(X);
-            e.Writer.Write(Y); 
+            e.Writer.Write(Y);
             e.Writer.Write(Z);
         }
 

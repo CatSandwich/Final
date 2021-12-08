@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DarkRift;
+﻿using DarkRift;
 
 namespace FinalCommon.Data
 {
+    // Stores an object, Id, and a position, Position, to move it to
     public class MoveObjectData : IDarkRiftSerializable
     {
         public ObjectIds Id;
         public Vector3 Position;
 
-        public MoveObjectData()
-        {
-
-        }
+        public MoveObjectData() { }
 
         public MoveObjectData(ObjectIds id, Vector3 position)
         {
