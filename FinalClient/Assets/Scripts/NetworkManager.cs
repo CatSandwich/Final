@@ -47,18 +47,26 @@ public class NetworkManager : MonoBehaviour
 
     private void _messageReceivedHandler(object sender, MessageReceivedEventArgs args)
     {
-        using (Message message = args.GetMessage() as Message)
+        switch ((ServerToClient)args.Tag)
         {
-            if (message.Tag == (ushort)ServerToClient.MoveObject)
+            case ServerToClient.ResizeObject:
             {
-                using (DarkRiftReader reader = message.GetReader())
-                {
-                    MoveObjectData data = reader.ReadSerializable<MoveObjectData>();
-                    gameManager.MoveObjectHandler(data.Position, (int)data.Id);
-                }
+                var data = args.GetMessage().GetReader().ReadSerializable<ResizeObjectData>();
+                gameManager.ResizeObjectHandler(data.Size, (int)data.Id);
+                return;
+            }
+
+            case ServerToClient.MoveObject:
+            {
+                var data = args.GetMessage().GetReader().ReadSerializable<MoveObjectData>();
+                gameManager.MoveObjectHandler(data.Position, (int)data.Id);
+                return;
             }
         }
+       
     }
+        
+
     public void sendPosition(int id, UnityEngine.Vector3 position)
     {
 

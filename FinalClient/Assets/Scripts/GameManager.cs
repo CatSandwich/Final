@@ -12,18 +12,15 @@ public class GameManager : MonoBehaviour
     float speed = 10;
 
     FinalCommon.Data.Vector3 currentPosition;
-    
+
 
     void Start()
     {
-        //myID = NetworkManager.myId;
-        //opponentId = NetworkManager.opponentId;
         myId = 0;
     }
 
     void Update()
     {
-        //_paddle1.set
         if (myId != 0)
         {
             if (Input.GetKey(KeyCode.W))
@@ -41,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     public void MoveObjectHandler(FinalCommon.Data.Vector3 position, int id)
     {
-        if(id == (int)ObjectIds.LeftPaddle && myId != (int)ObjectIds.RightPaddle)
+        if (id == (int)ObjectIds.LeftPaddle && myId != (int)ObjectIds.RightPaddle)
         {
             myId = (int)ObjectIds.RightPaddle;
             Debug.Log("I am RightPaddle");
@@ -56,7 +53,13 @@ public class GameManager : MonoBehaviour
         objects[id].transform.position = position1;
 
     }
+
+    public void ResizeObjectHandler(FinalCommon.Data.Vector2 size, int id)
+    {
+
+
+
+
+    }
 }
 
-//if (Input.GetKey(KeyCode.DownArrow)) transform.position += Vector3.down;
-//if (Input.GetKey(KeyCode.UpArrow)) transform.position += Vector3.up;
