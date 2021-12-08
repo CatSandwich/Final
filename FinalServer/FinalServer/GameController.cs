@@ -68,12 +68,12 @@ namespace FinalServer
         public async void Run()
         {
             // Initialize game world
-            _resize(ObjectIds.Ball       , Ball.Size              );
-            _resize(ObjectIds.LeftPaddle , LeftPaddle.Size        );
-            _resize(ObjectIds.RightPaddle, RightPaddle.Size       );
-            _resize(ObjectIds.Camera     , GameWorldSize          );
-            _move  (ObjectIds.Camera     , GameWorldSize / 2);
-            _move  (ObjectIds.Ball       , GameWorldSize / 2);
+            _resize(ObjectIds.Ball, Ball.Size);
+            _resize(ObjectIds.LeftPaddle, LeftPaddle.Size);
+            _resize(ObjectIds.RightPaddle, RightPaddle.Size);
+            _resize(ObjectIds.Camera, GameWorldSize);
+            _move(ObjectIds.Camera, GameWorldSize / 2);
+            _move(ObjectIds.Ball, GameWorldSize / 2);
 
             await Task.Delay(3000);
 
