@@ -27,22 +27,9 @@ public class NetworkManager : MonoBehaviour
             return _instance;
         }
     }
-    IEnumerator Start()
+    void Start()
     {
         Client.MessageReceived += _messageReceivedHandler;
-
-        while (Client.ConnectionState != ConnectionState.Connected)
-        {
-            yield return null;
-        }
-
-        using (var writer = DarkRiftWriter.Create())
-        {
-            //writer.Write(0);
-
-            //Client.SendMessage(Message.Create(0, writer), SendMode.Reliable);
-            Client.MessageReceived += _messageReceivedHandler;
-        }
     }
 
     private void _messageReceivedHandler(object sender, MessageReceivedEventArgs args)
@@ -52,34 +39,33 @@ public class NetworkManager : MonoBehaviour
             case ServerToClient.ResizeObject:
             {
                 var data = args.GetMessage().GetReader().ReadSerializable<ResizeObjectData>();
-                gameManager.ResizeObjectHandler(data.Size, (int)data.Id);
+                gameManager.ResizeObjectHandler(data.Size, data.Id);
                 return;
             }
-
             case ServerToClient.MoveObject:
             {
                 var data = args.GetMessage().GetReader().ReadSerializable<MoveObjectData>();
-                gameManager.MoveObjectHandler(data.Position, (int)data.Id);
+                gameManager.MoveObjectHandler(data.Position, data.Id);
+                return;
+            }
+            case ServerToClient.SetOwnership:
+            {
+                var data = args.GetMessage().GetReader().ReadSerializable<SetOwnershipData>();
+                gameManager.SetOwnershipHandler(data);
                 return;
             }
         }
-       
     }
-        
-
-    public void sendPosition(int id, UnityEngine.Vector3 position)
+    
+    public void SendPosition(UnityEngine.Vector3 position)
     {
-
-        Debug.Log("Trying to send");
-        using (var writer = DarkRiftWriter.Create())
+        using var writer = DarkRiftWriter.Create();
+        var data = new PaddlePositionData
         {
+            Position = new FinalCommon.Data.Vector3 { X = position.x, Y = position.y, Z = position.z }
+        };
 
-            Debug.Log("Sending");
-            PaddlePositionData data = new PaddlePositionData();
-            data.Position = new FinalCommon.Data.Vector3 { X = position.x, Y = position.y, Z = position.z };
-                
-            writer.Write(data);
-            Client.SendMessage(Message.Create((ushort)ClientToServer.PaddlePosition, writer), SendMode.Reliable);
-        }
+        writer.Write(data);
+        Client.SendMessage(Message.Create((ushort)ClientToServer.PaddlePosition, writer), SendMode.Unreliable);
     }
 }

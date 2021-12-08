@@ -26,6 +26,9 @@ namespace FinalCommon.Data
             e.Writer.Write(Y);
         }
 
+        public static Vector2 operator *(Vector2 lhs, int rhs) => new Vector2 { X = lhs.X * rhs, Y = lhs.Y * rhs };
+        public static Vector2 operator *(Vector2 lhs, float rhs) => new Vector2 { X = lhs.X * rhs, Y = lhs.Y * rhs };
         public static Vector2 operator /(Vector2 lhs, int rhs) => new Vector2 { X = lhs.X / rhs, Y = lhs.Y / rhs };
+        public static Vector2 operator /(Vector2 lhs, float rhs) => new Vector2 { X = lhs.X / rhs, Y = lhs.Y / rhs };
     }
 }

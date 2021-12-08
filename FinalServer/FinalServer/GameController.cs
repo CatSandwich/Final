@@ -12,15 +12,14 @@ namespace FinalServer
 {
     public class GameController
     {
-        public static readonly Vector2 GameWorldSize = new Vector2() { X = 10, Y = 5 };
+        public static readonly Vector2 GameWorldSize = new Vector2 { X = 10, Y = 5 };
         public const float PaddleOffset = 1f;
 
         public const float Speed = 3f;
         public const int TickSpeed = 20;
 
-        public int BallDirection = 1;
-
-        public float CalculatedSpeed => Speed * BallDirection * TickSpeed / 1000f;
+        public Vector2 BallDirection = new Vector2{X = 1, Y = 1};
+        public Vector2 CalculatedSpeed => BallDirection * Speed * TickSpeed / 1000f;
 
         public Task GameTask;
 
@@ -28,6 +27,8 @@ namespace FinalServer
 
         public IClient LeftClient;
         public IClient RightClient;
+
+        private bool _init = false;
 
         public Paddle LeftPaddle = new Paddle 
         { 
@@ -44,11 +45,13 @@ namespace FinalServer
 
         public void PaddlePositionHandler(IClient client, Vector3 newPos)
         {
+            if (!_init) return;
+
             if(client.ID == LeftClient.ID)
             {
                 lock (this)
                 {
-                    LeftPaddle.Position = newPos;
+                    LeftPaddle.Position.Y = newPos.Y;
                     return;
                 }
             }
@@ -57,7 +60,7 @@ namespace FinalServer
             {
                 lock (this)
                 {
-                    RightPaddle.Position = newPos;
+                    RightPaddle.Position.Y = newPos.Y;
                     return;
                 }
             }
@@ -72,23 +75,30 @@ namespace FinalServer
             _resize(ObjectIds.LeftPaddle, LeftPaddle.Size);
             _resize(ObjectIds.RightPaddle, RightPaddle.Size);
             _resize(ObjectIds.Camera, GameWorldSize);
-            _move(ObjectIds.Camera, GameWorldSize / 2);
+            _move(ObjectIds.Camera, new Vector3{X = GameWorldSize.X / 2, Y = GameWorldSize.Y / 2, Z = -10});
             _move(ObjectIds.Ball, GameWorldSize / 2);
+            _move(ObjectIds.LeftPaddle, LeftPaddle.Position);
+            _move(ObjectIds.RightPaddle, RightPaddle.Position);
+
+            LeftClient.SendMessage(ServerToClient.SetOwnership, new SetOwnershipData { Id = ObjectIds.LeftPaddle });
+            RightClient.SendMessage(ServerToClient.SetOwnership, new SetOwnershipData { Id = ObjectIds.RightPaddle });
 
             await Task.Delay(3000);
 
+            _init = true;
+
             while (true)
             {
-                Ball.Position.X += CalculatedSpeed;
+                Ball.Position += CalculatedSpeed;
 
-                if(Ball.Position.X <= PaddleOffset && Ball.CheckYAxisCollision(LeftPaddle))
+                if(Ball.Position.X - Ball.Size.X / 2 <= LeftPaddle.Position.X + LeftPaddle.Size.X / 2 && Ball.CheckYAxisCollision(LeftPaddle))
                 {
-                    BallDirection = 1;
+                    BallDirection.X = 1;
                 }
 
-                if(Ball.Position.X >= GameWorldSize.X - PaddleOffset && Ball.CheckYAxisCollision(RightPaddle))
+                if(Ball.Position.X + Ball.Size.X / 2 >= RightPaddle.Position.X - RightPaddle.Size.X / 2 && Ball.CheckYAxisCollision(RightPaddle))
                 {
-                    BallDirection = -1;
+                    BallDirection.X = -1;
                 }
 
                 if(Ball.Position.X <= 0)
@@ -97,12 +107,15 @@ namespace FinalServer
                     Ball.Position = GameWorldSize / 2;
                 }
 
-                if(Ball.Position.X >= GameWorldSize.X)
+                if (Ball.Position.X >= GameWorldSize.X)
                 {
                     Console.WriteLine("Right paddle lost");
                     Ball.Position = GameWorldSize / 2;
                 }
-                
+
+                if (Ball.Position.Y + Ball.Size.Y / 2 >= GameWorldSize.Y) BallDirection.Y = -1;
+                if (Ball.Position.Y - Ball.Size.Y / 2 <= 0) BallDirection.Y = 1;
+
                 _move(ObjectIds.Ball, Ball.Position);
                 LeftClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.RightPaddle, Position = RightPaddle.Position });
                 RightClient.SendMessage((ushort)ServerToClient.MoveObject, new MoveObjectData { Id = ObjectIds.LeftPaddle, Position = LeftPaddle.Position });

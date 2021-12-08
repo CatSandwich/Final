@@ -23,5 +23,6 @@ namespace FinalCommon.Data
         }
 
         public static implicit operator Vector3(Vector2 v2) => new Vector3 { X = v2.X, Y = v2.Y, Z = 0 };
+        public static Vector3 operator+(Vector3 lhs, Vector3 rhs) => new Vector3 { X = lhs.X + rhs.X, Y = lhs.Y + rhs.Y, Z = lhs.Z + rhs.Z};
     }
 }

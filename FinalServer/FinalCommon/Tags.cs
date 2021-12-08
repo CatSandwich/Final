@@ -3,7 +3,8 @@
     public enum ServerToClient : ushort
     {
         MoveObject,
-        ResizeObject
+        ResizeObject,
+        SetOwnership
     }
 
     public enum ClientToServer : ushort
