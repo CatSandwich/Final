@@ -3,9 +3,18 @@
 namespace FinalCommon.Data
 {
     // Stores an object, Id, for the client to assume ownership of
-    public class SetOwnershipData : IDarkRiftSerializable
+    public class SetOwnershipData : IDarkRiftSerializable, IServerToClient
     {
+        public ServerToClient ServerToClientTag => ServerToClient.SetOwnership;
+
         public ObjectIds Id;
+
+        public SetOwnershipData() { }
+
+        public SetOwnershipData(ObjectIds id)
+        {
+            Id = id;
+        }
 
         public void Deserialize(DeserializeEvent e)
         {

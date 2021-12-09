@@ -1,4 +1,5 @@
-﻿using DarkRift;
+﻿using System.Text;
+using DarkRift;
 
 namespace FinalCommon.Data
 {
@@ -20,18 +21,14 @@ namespace FinalCommon.Data
             e.Writer.Write(Size);
         }
 
-        public bool CheckCollision(Box other) => CheckXAxisCollision(other) || CheckYAxisCollision(other);
-
-        public bool CheckXAxisCollision(Box other)
+        public bool CheckCollision(Box other)
         {
-            return !(Position.X + Size.X / 2 < other.Position.X - other.Size.X / 2 ||
-                     Position.X - Size.X / 2 > other.Position.Y + other.Size.Y / 2);
-        }
-
-        public bool CheckYAxisCollision(Box other)
-        {
-            return !(Position.Y + Size.Y / 2 < other.Position.Y - other.Size.Y / 2 ||
-                     Position.Y - Size.Y / 2 > other.Position.Y + other.Size.Y / 2);
+            if (other == null) return false;
+            if (Position.Y - Size.Y / 2 > other.Position.Y + other.Size.Y / 2) return false;
+            if (Position.Y + Size.Y / 2 < other.Position.Y - other.Size.Y / 2) return false;
+            if (Position.X - Size.X / 2 > other.Position.X + other.Size.X / 2) return false;
+            if (Position.X + Size.X / 2 < other.Position.X - other.Size.X / 2) return false;
+            return true;
         }
     }
 }

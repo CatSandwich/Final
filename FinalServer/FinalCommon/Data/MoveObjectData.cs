@@ -3,8 +3,10 @@
 namespace FinalCommon.Data
 {
     // Stores an object, Id, and a position, Position, to move it to
-    public class MoveObjectData : IDarkRiftSerializable
+    public class MoveObjectData : IDarkRiftSerializable, IServerToClient
     {
+        public ServerToClient ServerToClientTag => ServerToClient.MoveObject;
+
         public ObjectIds Id;
         public Vector3 Position;
 

@@ -3,8 +3,10 @@
 namespace FinalCommon.Data
 {
     // Stores an object, Id, and a size, Size, to resize it to
-    public class ResizeObjectData : IDarkRiftSerializable
+    public class ResizeObjectData : IDarkRiftSerializable, IServerToClient
     {
+        public ServerToClient ServerToClientTag => ServerToClient.ResizeObject;
+
         public ObjectIds Id;
         public Vector2 Size;
 

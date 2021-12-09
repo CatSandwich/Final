@@ -1,7 +1,7 @@
-using System.Collections;
+using FinalCommon;
+using FinalCommon.Data;
 using System.Collections.Generic;
 using UnityEngine;
-using FinalCommon.Data;
 
 public class GameManager : MonoBehaviour
 {
@@ -44,6 +44,18 @@ public class GameManager : MonoBehaviour
     public void SetOwnershipHandler(SetOwnershipData data)
     {
         myId = data.Id;
+        var left = myId == ObjectIds.LeftPaddle;
+        
+        if (left)
+        {
+            Objects[ObjectIds.LeftPaddle].GetComponent<SpriteRenderer>().color = Color.green;
+            Objects[ObjectIds.RightPaddle].GetComponent<SpriteRenderer>().color = Color.red;
+        }
+        else
+        {
+            Objects[ObjectIds.LeftPaddle].GetComponent<SpriteRenderer>().color = Color.red;
+            Objects[ObjectIds.RightPaddle].GetComponent<SpriteRenderer>().color = Color.green;
+        }
     }
 }
 

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-
-using DarkRift;
+﻿using DarkRift;
 using DarkRift.Server;
-
 using FinalCommon;
 using FinalCommon.Data;
+using System;
 
 namespace FinalServer
 {
@@ -20,28 +17,25 @@ namespace FinalServer
         // The game is all controlled through this object
         public GameController Game;
 
-        // Entry point
+        // Entry point - plugin is initialized by DarkRift
         public FinalServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
         {
             Game = new GameController();
             pluginLoadData.ClientManager.ClientConnected += _clientConnectedHandler;
+            pluginLoadData.ClientManager.ClientDisconnected += _clientDisconnectedHandler;
         }
 
         // If room in game, adds new clients to it and adds message received handler
         private void _clientConnectedHandler(object sender, ClientConnectedEventArgs args)
         {
-            if (Game.LeftClient == null)
-            {
-                args.Client.MessageReceived += _messageReceivedHandler;
-                Game.LeftClient = args.Client;
-            }
-            else if (Game.RightClient == null)
-            {
-                args.Client.MessageReceived += _messageReceivedHandler;
-                Game.RightClient = args.Client;
-                Game.GameTask = Task.Run(Game.Run);
-            }
-            else Console.WriteLine("Client overflow - ignoring new client.");
+            args.Client.MessageReceived += _messageReceivedHandler;
+
+            Game.ClientConnectedHandler(args.Client);
+        }
+
+        private void _clientDisconnectedHandler(object sender, ClientDisconnectedEventArgs args)
+        {
+            Game.ClientDisconnectedHandler(args.Client);
         }
 
         // Verifies tag then redirects to the appropriate handler
@@ -59,16 +53,19 @@ namespace FinalServer
     }
 
     // Easier to use SendMessage methods
-    static class ClientExtensions
+    internal static class ClientExtensions
     {
-        public static void SendMessage<T>(this IClient client, ServerToClient tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable 
-            => client.SendMessage((ushort)tag, data, mode);
-        public static void SendMessage<T>(this IClient client, ushort tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable
+        public static void SendMessage<T>(this IClient client, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable, IServerToClient
+        {
+            client.SendMessage(data.ServerToClientTag, data, mode);
+        }
+
+        public static void SendMessage<T>(this IClient client, ServerToClient tag, T data, SendMode mode = SendMode.Reliable) where T : IDarkRiftSerializable
         {
             using (var writer = DarkRiftWriter.Create())
             {
                 writer.Write(data);
-                using (var message = Message.Create(tag, writer))
+                using (var message = Message.Create((ushort)tag, writer))
                 {
                     client.SendMessage(message, mode);
                 }
