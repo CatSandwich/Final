@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d2b44c570cb28644b8762e0b13e7c23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  host: 127.0.0.1
+  host: lacachita.com
   port: 4296
   noDelay: 0
   connectOnStart: 1
@@ -324,6 +324,11 @@ MonoBehaviour:
 --- !u!1 &993692357 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2439966430262459217, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
+  m_PrefabInstance: {fileID: 1468186727}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &993692359 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2439966430262459230, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
   m_PrefabInstance: {fileID: 1468186727}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &993692361
@@ -425,6 +430,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2439966430262459217, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
   m_PrefabInstance: {fileID: 1673025389}
   m_PrefabAsset: {fileID: 0}
+--- !u!212 &1169597620 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2439966430262459230, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
+  m_PrefabInstance: {fileID: 1673025389}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1169597622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -452,6 +462,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: LeftPaddle
       objectReference: {fileID: 0}
+    - target: {fileID: 2439966430262459229, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
+      propertyPath: Self
+      value: 
+      objectReference: {fileID: 993692359}
+    - target: {fileID: 2439966430262459229, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
+      propertyPath: Bounds
+      value: 
+      objectReference: {fileID: 1016051368}
     - target: {fileID: 2439966430262459229, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
       propertyPath: MainCamera
       value: 
@@ -541,6 +559,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: RightPaddle
       objectReference: {fileID: 0}
+    - target: {fileID: 2439966430262459229, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
+      propertyPath: Self
+      value: 
+      objectReference: {fileID: 1169597620}
+    - target: {fileID: 2439966430262459229, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
+      propertyPath: Bounds
+      value: 
+      objectReference: {fileID: 1016051368}
     - target: {fileID: 2439966430262459229, guid: d82fa85a9e71a894fa9e7b16859724f2, type: 3}
       propertyPath: MainCamera
       value: 
@@ -803,5 +829,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2177576993130111072, guid: b2927e55dff723c4f93034ae95c493a4, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: b2927e55dff723c4f93034ae95c493a4, type: 3}
